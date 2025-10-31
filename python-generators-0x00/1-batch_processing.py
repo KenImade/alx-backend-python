@@ -47,7 +47,7 @@ def stream_users_in_batches(batch_size):
             connection.close()
 
 
-def batch_processsing(batch_size):
+def batch_processing(batch_size):
     """Processes data in batches"""
     for user in stream_users_in_batches(batch_size):
         if int(user["age"]) > 25:
