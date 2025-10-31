@@ -1,20 +1,7 @@
 #!/usr/bin/python3
 import mysql.connector
 
-
-def connect_to_prodev():
-    """Connects the ALX_prodev database in MySQL"""
-    try:
-        connection = mysql.connector.connect(
-            host="localhost",
-            user="username",
-            password="password",
-            database="ALX_prodev",
-        )
-        return connection
-    except mysql.connector.Error as err:
-        print(f"Failed to connect to database: {err}")
-        return None
+seed = __import__("seed")
 
 
 def stream_users_in_batches(batch_size):
@@ -22,7 +9,7 @@ def stream_users_in_batches(batch_size):
     connection = None
     cursor = None
     try:
-        connection = connect_to_prodev()
+        connection = seed.connect_to_prodev()
 
         if not connection:
             return
