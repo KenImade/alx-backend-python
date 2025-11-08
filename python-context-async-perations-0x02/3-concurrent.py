@@ -3,14 +3,14 @@ import aiosqlite
 
 
 # Asynchronous function to fetch all users
-async def async_fetch_users(db_path="users.db"):
+async def asyncfetchusers(db_path="users.db"):
     async with aiosqlite.connect(db_path) as db:
         async with db.execute("SELECT * FROM users") as cursor:
             return await cursor.fetchall()
 
 
 # Asynchronous function to fetch users older than 40
-async def async_fetch_older_users(db_path="users.db"):
+async def asyncfetcholder_users(db_path="users.db"):
     async with aiosqlite.connect(db_path) as db:
         async with db.execute("SELECT * FROM users WHERE age > ?", (40,)) as cursor:
             return await cursor.fetchall()
