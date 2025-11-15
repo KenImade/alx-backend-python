@@ -73,7 +73,7 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(repos, expected_names)
 
             # Check that _public_repos_url was accessed once
-            self.assertEqual(mock_url.call_count, 1)
+            mock_url.assert_called_once()
 
             # Check that get_json was called once with mocked URL
             mock_get_json.assert_called_once_with("http://example.com/repos")
