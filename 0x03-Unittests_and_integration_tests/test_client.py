@@ -3,7 +3,7 @@
 Unittests for the GithubOrgClient class in client.py
 """
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
 from client import GithubOrgClient
 
@@ -61,7 +61,7 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_get_json.return_value = test_payload
 
         with patch.object(GithubOrgClient, "_public_repos_url",
-                          new_callable=property) as mock_url:
+                          new_callable=PropertyMock) as mock_url:
             mock_url.return_value = "http://example.com/repos"
 
             client = GithubOrgClient("test_org")
