@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
-    sender_email = serializers.EmailField(read_only=True)
+    sender_email = serializers.CharField(source="sender.email", read_only=True)
 
     class Meta:
         model = Message
