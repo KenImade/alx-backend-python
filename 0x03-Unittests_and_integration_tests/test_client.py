@@ -4,8 +4,9 @@ Unittests for the GithubOrgClient class in client.py
 """
 import unittest
 from unittest.mock import patch, PropertyMock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
+from fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -85,6 +86,50 @@ class TestGithubOrgClient(unittest.TestCase):
         """Test that has_license returns correct boolean value"""
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+
+@parameterized_class(
+    ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
+    TEST_PAYLOAD
+)
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration tests for GithubOrgClient"""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up class fixtures before running tests"""
+
+        def side_effect_function(url):
+            """Side effect function to return appropriate
+            payload based on URL
+            """
+
+            class MockResponse:
+                """Mock response object"""
+
+                def __init__(self, json_data):
+                    self.json_data = json_data
+
+                def json(self):
+                    """Return json data"""
+                    return self.json_data
+
+            # Map URLs to their corresponding payloads
+            if url == "https://api.github.com/orgs/google":
+                return MockResponse(cls.org_payload)
+            elif url == cls.org_payload.get("repos_url"):
+                return MockResponse(cls.repos_payload)
+            return MockResponse(None)
+
+        # Start the patcher for requests.get
+        cls.get_patcher = patch('requests.get',
+                                side_effect=side_effect_function)
+        cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Tear down class fixtures after running tests"""
+        cls.get_patcher.stop()
 
 
 if __name__ == "__main__":
