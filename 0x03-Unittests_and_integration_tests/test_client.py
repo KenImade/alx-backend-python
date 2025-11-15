@@ -131,6 +131,22 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         """Tear down class fixtures after running tests"""
         cls.get_patcher.stop()
 
+    def test_public_repos(self):
+        """Test that public_repos returns expected results from fixtures"""
+        client = GithubOrgClient("google")
+        repos = client.public_repos()
+
+        # Check that the returned repos match expected_repos from fixtures
+        self.assertEqual(repos, self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """Test public_repos with license filter returns expected results"""
+        client = GithubOrgClient("google")
+        repos = client.public_repos(license="apache-2.0")
+
+        # Check that the returned repos match apache2_repos from fixtures
+        self.assertEqual(repos, self.apache2_repos)
+
 
 if __name__ == "__main__":
     unittest.main()
