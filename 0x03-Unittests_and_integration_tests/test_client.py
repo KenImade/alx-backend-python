@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Unittests for the GithubOrgClient class in client.py
+"""
 import unittest
 from unittest.mock import patch
 from parameterized import parameterized
@@ -63,7 +66,7 @@ class TestGithubOrgClient(unittest.TestCase):
                           new_callable=property) as mock_url:
             mock_url.return_value = "http://example.com/repos"
 
-            repos = client.public_repos()
+            repos = client.public_repos
 
             # Check returned repo names
             expected_names = ["repo1", "repo2", "repo3"]
@@ -74,6 +77,7 @@ class TestGithubOrgClient(unittest.TestCase):
 
             # Check that get_json was called once with mocked URL
             mock_get_json.assert_called_once_with("http://example.com/repos")
+
 
 if __name__ == "__main__":
     unittest.main()
