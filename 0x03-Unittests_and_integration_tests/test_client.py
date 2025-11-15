@@ -66,7 +66,7 @@ class TestGithubOrgClient(unittest.TestCase):
                           new_callable=property) as mock_url:
             mock_url.return_value = "http://example.com/repos"
 
-            repos = client.public_repos
+            repos = client.public_repos()
 
             # Check returned repo names
             expected_names = ["repo1", "repo2", "repo3"]
