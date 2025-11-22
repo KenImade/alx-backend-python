@@ -3,7 +3,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
-from .permissions import IsOwner
+from .permissions import IsParticipantOfConversation
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     search_fields = ["conversation_id", "message_body"]
 
     def create(self, request, *args, **kwargs):
@@ -38,7 +38,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     search_fields = ["conversation_id", "message_body"]
 
     def create(self, request, *args, **kwargs):
@@ -70,3 +70,23 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        # Only messages in conversations where the user is a participant
+        return Message.objects.filter(conversation__participants=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        return super().partial_update(request, *args, **kwargs)
