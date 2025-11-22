@@ -139,17 +139,13 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "messaging_app.chats.auth.CustomJWTAuthentication",
     ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "messaging_app.chats.pagination.MessagePagination",
+    "PAGE_SIZE": 20,
 }
 
-REST_FRAMEWORK["DEFAULT_FILTER_BACKENDS"] = [
-    "django_filters.rest_framework.DjangoFilterBackend"
-]
-
-REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = [
-    "messaging_app.chats.pagination.MessagePagination"
-]
-
-REST_FRAMEWORK["PAGE_SIZE"] = 20
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
