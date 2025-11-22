@@ -77,16 +77,19 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        self.check_object_permissions(request, instance)
+        if not self.check_object_permissions(request, instance):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        self.check_object_permissions(request, instance)
+        if not self.check_object_permissions(request, instance):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        self.check_object_permissions(request, instance)
+        if not self.check_object_permissions(request, instance):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
         return super().partial_update(request, *args, **kwargs)
