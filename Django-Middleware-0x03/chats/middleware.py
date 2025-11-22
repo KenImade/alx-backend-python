@@ -39,7 +39,7 @@ class RequestLoggingMiddleware:
         return response
 
 
-class RateLimitMessagesMiddleware:
+class OffensiveLanguageMiddleware:
     """
     Limits the number of messages a user can send per minute based on their IP address.
     """
