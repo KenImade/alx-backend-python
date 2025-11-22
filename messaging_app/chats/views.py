@@ -3,6 +3,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsOwner
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -10,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
     search_fields = ["conversation_id", "message_body"]
 
     def create(self, request, *args, **kwargs):
@@ -37,7 +38,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
     search_fields = ["conversation_id", "message_body"]
 
     def create(self, request, *args, **kwargs):
@@ -55,11 +56,11 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            conversation = Conversation.objects.get(
-                conversation_id=conversation_id)
+            conversation = Conversation.objects.get(conversation_id=conversation_id)
         except Conversation.DoesNotExist:
-            return Response({"error": "Conversation not found"},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         message = Message.objects.create(
             sender=request.user,
