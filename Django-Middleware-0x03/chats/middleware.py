@@ -87,3 +87,36 @@ class OffensiveLanguageMiddleware:
         else:
             ip = request.META.get("REMOTE_ADDR")
         return ip
+
+
+class RolepermissionMiddleware:
+    """
+    Middleware that allows access only to users with 'admin' or 'moderator' roles
+    for protected endpoints.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Example: protect all POST, PUT, DELETE requests to /api/messages/ and /api/conversations/
+        protected_paths = ["/api/messages/", "/api/conversations/"]
+        if any(request.path.startswith(path) for path in protected_paths):
+            # Ensure the user is authenticated
+            user = getattr(request, "user", None)
+            if not user or not user.is_authenticated:
+                return JsonResponse({"error": "Authentication required."}, status=401)
+
+            # Check user role
+            user_role = getattr(
+                user, "role", None
+            )  # assuming your User model has a 'role' field
+            if user_role not in ["admin", "moderator"]:
+                return JsonResponse(
+                    {"error": "You do not have permission to perform this action."},
+                    status=403,
+                )
+
+        # Continue processing request
+        response = self.get_response(request)
+        return response
