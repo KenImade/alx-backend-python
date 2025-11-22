@@ -1,7 +1,7 @@
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
 
 
-class IsOwner(BasePermission):
+class IsOwner(permissions.BasePermission):
     """Allow users to access only their own messages/conversations."""
 
     def has_object_permission(self, request, view, obj):
