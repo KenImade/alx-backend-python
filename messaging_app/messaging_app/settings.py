@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django-filter",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework.simplejwt",
@@ -139,6 +140,16 @@ REST_FRAMEWORK = {
         "messaging_app.chats.auth.CustomJWTAuthentication",
     ],
 }
+
+REST_FRAMEWORK["DEFAULT_FILTER_BACKENDS"] = [
+    "django_filters.rest_framework.DjangoFilterBackend"
+]
+
+REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = [
+    "messaging_app.chats.pagination.MessagePagination"
+]
+
+REST_FRAMEWORK["PAGE_SIZE"] = 20
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
