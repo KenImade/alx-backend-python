@@ -5,20 +5,7 @@ from django.http import HttpResponseForbidden
 logging.basicConfig(filename="requests.log", level=logging.INFO, format="%(message)s")
 
 
-class RequestLoggingMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        user = request.user.username if request.user.is_authenticated else "Anonymous"
-
-        logging.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
-
-        response = self.get_response(request)
-        return response
-
-
-class RestrictAccessbyTimeMiddleware:
+class RestrictAccessByTimeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -32,6 +19,19 @@ class RestrictAccessbyTimeMiddleware:
             return HttpResponseForbidden(
                 "Access to messaging is restricted between 9 PM and 6 AM."
             )
+
+        response = self.get_response(request)
+        return response
+
+
+class RequestLoggingMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = request.user.username if request.user.is_authenticated else "Anonymous"
+
+        logging.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
 
         response = self.get_response(request)
         return response
