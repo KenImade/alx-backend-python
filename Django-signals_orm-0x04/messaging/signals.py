@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Message, Notification
+from .models import Message, Notification, MessageHistory
 from django.contrib.auth.models import User
 
 
@@ -75,3 +75,47 @@ def log_message_history_on_edit(sender, instance, **kwargs):
     else:
         # This is a new message creation, do nothing.
         print(f"--- PRE_SAVE: New Message creation. Skipping history log. ---")
+
+
+@receiver(post_delete, sender=User)
+def cleanup_user_related_data(sender, instance, **kwargs):
+    """
+    Cleans up all remaining Message, Notification, and MessageHistory records
+    associated with a User *after* the User account has been deleted.
+
+    NOTE: With proper on_delete=CASCADE settings on Foreign Keys, this manual
+    cleanup is often redundant for many relations, but it ensures all related
+    objects are handled, especially for complex or multi-step relations.
+    """
+    user_id = instance.pk  # The PK of the deleted user is still available here
+
+    # 1. Delete Messages: Delete messages sent/received by the deleted user.
+    #    (This is usually handled by CASCADE, but performed manually here for the signal objective)
+    messages_to_delete = Message.objects.filter(
+        models.Q(sender_id=user_id) | models.Q(receiver_id=user_id)
+    )
+    deleted_messages_count, _ = messages_to_delete.delete()
+    print(
+        f"--- POST_DELETE: Deleted {deleted_messages_count} Messages for user {user_id}. ---"
+    )
+
+    # 2. Delete Notifications: Notifications where the user was the recipient.
+    #    (This is usually handled by CASCADE on Notification.user)
+    deleted_notifications_count, _ = Notification.objects.filter(
+        user_id=user_id
+    ).delete()
+    print(
+        f"--- POST_DELETE: Deleted {deleted_notifications_count} Notifications for user {user_id}. ---"
+    )
+
+    # 3. Clean up orphaned Message History records related to the deleted user's messages.
+    #    If a Message is deleted (step 1), its related MessageHistory records will
+    #    be deleted due to CASCADE on MessageHistory.message.
+
+    # We can perform a safety check for any remaining MessageHistory records
+    # where the editor was the deleted user (only if MessageHistory.editor was CASCADE)
+    # Since we set MessageHistory.editor to SET_NULL, no further action is required for the editor field.
+
+    print(
+        f"--- Signal Triggered: Cleanup complete for deleted user: {instance.username} ---"
+    )
