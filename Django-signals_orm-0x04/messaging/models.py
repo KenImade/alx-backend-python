@@ -9,9 +9,19 @@ class Message(models.Model):
         User, on_delete=models.CASCADE, related_name="sent_messages"
     )
 
-    # The receiver of the message
+    # The receiver of the message (The primary target of the conversation/thread)
     receiver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="received_messages"
+    )
+
+    # 🌟 NEW FIELD for Threading: Self-referential ForeignKey
+    # If this field is NULL, the message is the start of a new thread.
+    parent_message = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="replies",  # This name is used to retrieve all children/replies
     )
 
     # The current content of the message
@@ -20,7 +30,7 @@ class Message(models.Model):
     # The timestamp when the message was initially created
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    # 🌟 NEW FIELD: Tracks if the message has ever been edited
+    # Tracks if the message has ever been edited
     edited = models.BooleanField(default=False)
 
     class Meta:
