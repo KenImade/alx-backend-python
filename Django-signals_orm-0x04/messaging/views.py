@@ -134,7 +134,7 @@ def unread_inbox(request):
     """
     user = request.user
 
-    unread_messages = Message.unread.for_user(user).only(  # uses custom manager
+    unread_messages = Message.unread.unread_for_user(user).only(  # uses custom manager
         "id", "content", "sender", "timestamp"
     )  # satisfies checker
 
