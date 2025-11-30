@@ -47,8 +47,8 @@ class MessageHistory(models.Model):
     edited_at = models.DateTimeField(auto_now=True)
 
     # The user who performed the edit (usually the sender)
-    editor = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="edited_messages"
+    edited_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="message_edited_by"
     )
 
     class Meta:
