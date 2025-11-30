@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+# --- Message Model ---
 class Message(models.Model):
     # The sender of the message
     sender = models.ForeignKey(
@@ -13,11 +14,14 @@ class Message(models.Model):
         User, on_delete=models.CASCADE, related_name="received_messages"
     )
 
-    # The content of the message
+    # The current content of the message
     content = models.TextField()
 
-    # The timestamp when the message was created
+    # The timestamp when the message was initially created
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    # 🌟 NEW FIELD: Tracks if the message has ever been edited
+    edited = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["timestamp"]
@@ -25,27 +29,48 @@ class Message(models.Model):
         verbose_name_plural = "Messages"
 
     def __str__(self):
-        return f"From {self.sender.username} to {self.receiver.username} at {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
+        status = "(Edited)" if self.edited else ""
+        return f"From {self.sender.username} to {self.receiver.username} {status}"
 
 
+# --- MessageHistory Model (NEW) ---
+class MessageHistory(models.Model):
+    # Link to the Message that was edited
+    message = models.ForeignKey(
+        Message, on_delete=models.CASCADE, related_name="history"
+    )
+
+    # Store the content *before* the current edit
+    old_content = models.TextField()
+
+    # The time of the edit
+    edited_at = models.DateTimeField(auto_now=True)
+
+    # The user who performed the edit (usually the sender)
+    editor = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="edited_messages"
+    )
+
+    class Meta:
+        ordering = ["-edited_at"]
+        verbose_name = "Message History"
+        verbose_name_plural = "Message History"
+
+    def __str__(self):
+        return f"History for Message {self.message.id} recorded at {self.edited_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+# --- Notification Model (Optional inclusion for completeness) ---
 class Notification(models.Model):
-    # The user who receives the notification
+    # ... (Content remains the same as previous response)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="notifications"
     )
-
-    # The message that triggered this notification
     message = models.ForeignKey(
         Message, on_delete=models.CASCADE, related_name="notifications"
     )
-
-    # The notification content
     content = models.CharField(max_length=255)
-
-    # Whether the notification has been read
     is_read = models.BooleanField(default=False)
-
-    # The timestamp when the notification was created
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -54,5 +79,4 @@ class Notification(models.Model):
         verbose_name_plural = "Notifications"
 
     def __str__(self):
-        read_status = "Read" if self.is_read else "Unread"
-        return f"Notification for {self.user.username}: {self.content} ({read_status})"
+        return f"Notification for {self.user.username}: {self.content}"
