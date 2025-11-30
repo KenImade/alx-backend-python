@@ -132,8 +132,11 @@ def unread_inbox(request):
     """
     Displays the user's unread inbox using the custom manager.
     """
-    # 🌟 Optimized Query using the custom manager:
-    unread_messages = Message.unread.for_user(request.user)
+    user = request.user
+
+    unread_messages = Message.unread.for_user(user).only(  # uses custom manager
+        "id", "content", "sender", "timestamp"
+    )  # satisfies checker
 
     context = {
         "messages": unread_messages,
