@@ -18,7 +18,7 @@ def delete_user(request):
     #    In a real application, you'd check a confirmation flag/password here.
 
     # Get the user instance to be deleted
-    user_to_delete = request.user
+    user = request.user
 
     # Log out the user before deletion (to prevent immediate login attempt post-deletion)
     from django.contrib.auth import logout
@@ -27,8 +27,8 @@ def delete_user(request):
 
     # 2. Delete the user
     # This call to .delete() is what triggers the post_delete signal.
-    username = user_to_delete.username
-    user_to_delete.delete()
+    username = user.username
+    user.delete()
 
     messages.success(
         request, f"Your account ({username}) has been successfully deleted."
