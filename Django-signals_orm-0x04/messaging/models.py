@@ -9,19 +9,14 @@ class Message(models.Model):
         User, on_delete=models.CASCADE, related_name="sent_messages"
     )
 
-    # The receiver of the message (The primary target of the conversation/thread)
+    # The receiver of the message
     receiver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="received_messages"
     )
 
-    # 🌟 NEW FIELD for Threading: Self-referential ForeignKey
-    # If this field is NULL, the message is the start of a new thread.
+    # Field for Threading
     parent_message = models.ForeignKey(
-        "self",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="replies",  # This name is used to retrieve all children/replies
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="replies"
     )
 
     # The current content of the message
@@ -33,13 +28,20 @@ class Message(models.Model):
     # Tracks if the message has ever been edited
     edited = models.BooleanField(default=False)
 
+    # 🌟 NEW FIELD: Tracks if the receiver has read the message
+    read = models.BooleanField(default=False)
+
+    # 🌟 Custom Managers
+    objects = models.Manager()  # The default manager
+    unread = UnreadMessagesManager()  # The custom manager for unread messages
+
     class Meta:
         ordering = ["timestamp"]
         verbose_name = "Message"
         verbose_name_plural = "Messages"
 
     def __str__(self):
-        status = "(Edited)" if self.edited else ""
+        status = "(Read)" if self.read else "(Unread)"
         return f"From {self.sender.username} to {self.receiver.username} {status}"
 
 

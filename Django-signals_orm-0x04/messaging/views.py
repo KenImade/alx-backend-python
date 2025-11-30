@@ -125,3 +125,18 @@ def conversation_detail(request, message_id):
         "threaded_data": threaded_data,  # Use this in the template for rendering
     }
     return render(request, "messaging/conversation_detail.html", context)
+
+
+@login_required
+def unread_inbox(request):
+    """
+    Displays the user's unread inbox using the custom manager.
+    """
+    # 🌟 Optimized Query using the custom manager:
+    unread_messages = Message.unread.for_user(request.user)
+
+    context = {
+        "messages": unread_messages,
+        "unread_count": unread_messages.count(),
+    }
+    return render(request, "messaging/unread_inbox.html", context)
